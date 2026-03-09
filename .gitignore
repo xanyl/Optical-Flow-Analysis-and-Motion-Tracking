@@ -20,6 +20,9 @@ Thumbs.db
 cv_project_output/
 cv_project_output.zip
 
+
+
+.pdf
 # LaTeX build files
 *.log
 *.aux
