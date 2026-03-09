@@ -63,11 +63,6 @@ Optical Flow Analysis/
 ├── plot_motion_stats.py
 ├── tracking_validation.py
 ├── main.py
-│
-├── report.tex
-├── references.bib
-├── README.md
-│
 └── cv_project_output/
     ├── sample1_preview_1.jpg
     ├── sample1_preview_2.jpg
