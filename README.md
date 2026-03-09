@@ -401,27 +401,6 @@ Expected observations:
 - more irregular and non-rigid motion patterns
 - higher motion magnitude and moving-pixel ratio
 
----
-
-## Report Files
-
-This project also includes:
-
-- `report.tex` — LaTeX report
-- `references.bib` — bibliography database
-
-To compile the report:
-
-```bash
-pdflatex report.tex
-bibtex report
-pdflatex report.tex
-pdflatex report.tex
-```
-
-Make sure the `cv_project_output/` folder exists before compiling, because the report references generated figures and result images.
-
----
 
 ## Troubleshooting
 
@@ -445,22 +424,6 @@ Possible reasons:
 
 ### Plots do not appear
 If running in a terminal-only environment, figures may still be saved even if interactive display is limited. Check the output folder.
-
----
-
-## Academic Notes
-
-If you are using this project for coursework or submission:
-
-- cite all external sources used in the report
-- include both theory and implementation
-- attach representative figures and plots
-- discuss limitations such as:
-  - occlusion
-  - brightness changes
-  - motion blur
-  - textureless regions
-  - non-rigid motion
 
 ---
 
