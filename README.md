@@ -164,7 +164,7 @@ python tracking_validation.py
 If your scripts are in a different folder:
 
 ```bash
-python main.py --dir "E:\\Study\\Second Sem\\CV\\project_5\\Optical Flow Analysis"
+python main.py --dir "path\\to\\project_5\\Optical Flow Analysis"
 ```
 
 ### Continue even if one script fails
