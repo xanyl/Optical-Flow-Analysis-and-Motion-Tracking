@@ -451,7 +451,6 @@ This repository is structured so the full workflow can be executed in a clean, r
 
 If needed, you can further improve the project by adding:
 - argument parsing for video paths
-- automatic report generation
 - GUI/video preview tools
 - support for additional optical flow methods
 
