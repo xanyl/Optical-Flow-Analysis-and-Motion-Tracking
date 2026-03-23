@@ -3,13 +3,20 @@ import subprocess
 import sys
 from pathlib import Path
 
-SCRIPTS = [
+PART_A_SCRIPTS = [
     "video_confirm.py",
     "extract_frames.py",
     "optical_flow_analysis.py",
     "plot_motion_stats.py",
     "tracking_validation.py",
 ]
+
+PART_B_SCRIPTS = [
+    "structure_from_motion.py",
+    "sfm_math_derivations.py",
+]
+
+ALL_SCRIPTS = PART_A_SCRIPTS + PART_B_SCRIPTS
 
 
 def run_script(script_path: Path, python_executable: str) -> int:
@@ -37,11 +44,27 @@ def main():
         help="Directory that contains the existing script files.",
     )
     parser.add_argument(
+        "--part",
+        choices=["a", "b"],
+        default=None,
+        help="Run only Part A (optical flow) or Part B (structure from motion). Omit to run all.",
+    )
+    parser.add_argument(
         "--continue-on-error",
         action="store_true",
         help="Continue running the remaining scripts even if one fails.",
     )
     args = parser.parse_args()
+
+    if args.part == "a":
+        scripts = PART_A_SCRIPTS
+        print("Running Part A: Optical Flow & Motion Tracking")
+    elif args.part == "b":
+        scripts = PART_B_SCRIPTS
+        print("Running Part B: Structure from Motion")
+    else:
+        scripts = ALL_SCRIPTS
+        print("Running all scripts (Part A + Part B)")
 
     base_dir = Path(args.dir).resolve()
     python_executable = sys.executable
@@ -49,7 +72,7 @@ def main():
     print(f"Using Python: {python_executable}")
     print(f"Script directory: {base_dir}")
 
-    missing = [name for name in SCRIPTS if not (base_dir / name).is_file()]
+    missing = [name for name in scripts if not (base_dir / name).is_file()]
     if missing:
         print("\nError: these files were not found:")
         for name in missing:
@@ -57,7 +80,7 @@ def main():
         sys.exit(1)
 
     results = []
-    for name in SCRIPTS:
+    for name in scripts:
         script_path = base_dir / name
         exit_code = run_script(script_path, python_executable)
         results.append((name, exit_code))

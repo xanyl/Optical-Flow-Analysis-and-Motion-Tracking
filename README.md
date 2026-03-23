@@ -53,35 +53,55 @@ This repository processes two videos and performs the following tasks in sequenc
 
 ```text
 Optical Flow Analysis/
-│
-├── sample1.mp4
-├── sample2.mp4
-│
-├── video_confirm.py
-├── extract_frames.py
-├── optical_flow_analysis.py
-├── plot_motion_stats.py
-├── tracking_validation.py
-├── main.py
-└── cv_project_output/
-    ├── sample1_preview_1.jpg
-    ├── sample1_preview_2.jpg
-    ├── sample1_preview_3.jpg
-    ├── sample2_preview_1.jpg
-    ├── sample2_preview_2.jpg
-    ├── sample2_preview_3.jpg
-    ├── sample1_optical_flow.mp4
-    ├── sample2_optical_flow.mp4
-    ├── sample1_flow_stats.csv
-    ├── sample2_flow_stats.csv
-    ├── sample1_mean_flow_plot.png
-    ├── sample2_mean_flow_plot.png
-    ├── sample1_moving_ratio_plot.png
-    ├── sample2_moving_ratio_plot.png
-    ├── sample1_tracking_validation.csv
-    ├── sample2_tracking_validation.csv
-    ├── sample1_tracking_validation.jpg
-    └── sample2_tracking_validation.jpg
+|
+|-- sample1.mp4
+|-- sample2.mp4
+|
+|-- images/
+|   |-- image_front.jpeg
+|   |-- image_left.jpeg
+|   |-- image_right.jpeg
+|   |-- image_top.jpeg
+|   +-- image_bottom.jpeg
+|
+|-- video_confirm.py
+|-- extract_frames.py
+|-- optical_flow_analysis.py
+|-- plot_motion_stats.py
+|-- tracking_validation.py
+|-- structure_from_motion.py
+|-- sfm_math_derivations.py
+|-- main.py
++-- cv_project_output/
+    |-- sample1_preview_1.jpg
+    |-- sample1_preview_2.jpg
+    |-- sample1_preview_3.jpg
+    |-- sample2_preview_1.jpg
+    |-- sample2_preview_2.jpg
+    |-- sample2_preview_3.jpg
+    |-- sample1_optical_flow.mp4
+    |-- sample2_optical_flow.mp4
+    |-- sample1_flow_stats.csv
+    |-- sample2_flow_stats.csv
+    |-- sample1_mean_flow_plot.png
+    |-- sample2_mean_flow_plot.png
+    |-- sample1_moving_ratio_plot.png
+    |-- sample2_moving_ratio_plot.png
+    |-- sample1_tracking_validation.csv
+    |-- sample2_tracking_validation.csv
+    |-- sample1_tracking_validation.jpg
+    |-- sample2_tracking_validation.jpg
+    |-- sfm_feature_matches.jpg
+    |-- sfm_homography_warp.jpg
+    |-- sfm_reconstructed_boundary.png
+    |-- sfm_camera_positions.png
+    |-- sfm_summary.csv
+    |-- sfm_math_page_1.png
+    |-- sfm_math_page_2.png
+    |-- sfm_math_page_3.png
+    |-- sfm_math_page_4.png
+    |-- sfm_math_page_5.png
+    +-- sfm_math_page_6.png
 ```
 
 ---
@@ -94,6 +114,9 @@ Optical Flow Analysis/
 - Motion statistics saved as CSV files
 - Automatic graph generation for report evidence
 - Motion tracking validation with subpixel estimation
+- Structure from Motion with homography-based boundary reconstruction
+- Step-by-step mathematical derivations (6 pages)
+- Camera pose recovery and 3D visualization
 - LaTeX report support with bibliography
 - Clean output organization inside `cv_project_output/`
 
@@ -231,6 +254,32 @@ Outputs include:
 - visualization image of tracked points
 - mean and maximum tracking error
 
+### `structure_from_motion.py`
+Performs Structure from Motion on four images of a planar object (book back cover).
+
+It performs:
+- SIFT feature detection and matching across all views
+- Homography estimation using RANSAC
+- Book boundary detection and cross-view projection
+- Camera pose recovery via homography decomposition
+- 3D camera position visualization
+
+Outputs include:
+- feature match visualization
+- homography warp alignment
+- reconstructed boundary overlay on all views
+- 3D camera position plot
+- summary CSV with homography matrices and reprojection errors
+
+### `sfm_math_derivations.py`
+Generates six pages of step-by-step mathematical derivations covering:
+- Homography for planar scenes
+- Direct Linear Transform (DLT)
+- SVD solution and RANSAC
+- Pose recovery from homography
+- Triangulation
+- Reprojection error
+
 ### `main.py`
 A lightweight runner script that executes all existing project scripts in the correct order.
 
@@ -276,6 +325,16 @@ cv_project_output/
 - `sample2_tracking_validation.csv`
 - `sample1_tracking_validation.jpg`
 - `sample2_tracking_validation.jpg`
+
+### Structure from Motion
+- `sfm_feature_matches.jpg`
+- `sfm_homography_warp.jpg`
+- `sfm_reconstructed_boundary.png`
+- `sfm_camera_positions.png`
+- `sfm_summary.csv`
+
+### Mathematical derivations
+- `sfm_math_page_1.png` through `sfm_math_page_6.png`
 
 ---
 
@@ -332,6 +391,57 @@ Because tracked points often land at non-integer coordinates, bilinear interpola
 The predicted point position from tracking is compared with the best local template match in the next frame, and the error is measured in pixels.
 
 ---
+
+## Part C — Structure from Motion (Planar Object)
+
+### Object
+
+The object is the back cover of the book *The Only Woman in the Room* by Marie Benedict — a flat, planar surface with rich text and visual features (barcode, cover art, text blocks).
+
+### Camera
+
+- **Device**: iPhone 13
+- **Intrinsic matrix K**:
+
+```text
+K = [[1635.8023    0.0000   756.7658]
+     [   0.0000 1635.3378  1005.2630]
+     [   0.0000    0.0000     1.0000]]
+```
+
+- **Focal length**: approximately 1636 pixels
+- **Principal point**: (757, 1005) pixels
+
+### Viewpoints
+
+Four images were captured from different positions around the book:
+
+1. **Front** — camera roughly perpendicular to the book surface (reference view)
+2. **Left** — camera shifted to the left of the book
+3. **Right** — camera shifted to the right of the book
+4. **Top** — camera positioned above and angled downward
+
+### Pipeline
+
+1. Detect SIFT features in all four views
+2. Match features between each view and the reference (front) using Lowe's ratio test
+3. Estimate 3x3 homographies using RANSAC with the DLT algorithm
+4. Detect the book boundary corners in the reference view via edge/contour detection
+5. Project corners to other views via inverse homography to validate the estimation
+6. Decompose each homography into camera rotation R and translation t
+7. Compute camera centers in world coordinates: C = -R^T t
+8. Plot camera positions and the object plane in 3D
+
+### Mathematical derivations
+
+Six derivation pages are generated covering:
+
+1. Homography for planar scenes (pinhole model, Z=0 constraint, inter-image homography)
+2. Direct Linear Transform — setting up A*h = 0 from point correspondences
+3. SVD solution and RANSAC robust estimation
+4. Camera pose recovery from homography decomposition
+5. Triangulation and planar simplification
+6. Reprojection error definition and computation
 
 ## Example Results from This Project
 
